@@ -1,0 +1,334 @@
+<html>
+    <head>
+        <title>Belajar Vue</title>
+        <style>
+            body{
+            margin: auto;
+            margin-top: 80px;
+            padding-left: 200px;
+            padding-right: 200px;
+            color: #72CAC0;
+            font-family: 'Candal', sans-serif;
+            }
+            h1{
+                font-size: 40px;
+                position: relative;
+            }
+            .product-image img{
+                width: 300px;
+                max-height: 400px;
+            }
+            .product{
+                width: 900px;
+                display: flex;
+                align-items: flex-start;
+            }
+            .product-info{
+                margin-left: 50px;
+                align-self: flex-start;
+                font-family: 'Gurajada', serif;
+                top: -60px;
+                position: relative;
+                color: #FD717A;
+            }
+            .stock{
+                font-size: 40px;
+
+            }
+            .detail{
+                font-size: 25px;
+                margin: 0;
+            }
+            .variant{
+                display: inline-block;
+                margin-left: 20px;
+                margin-right: 20px;
+                margin-top: 40px;
+                top: -30px;
+                position: relative;
+                font-size: 60px;
+            }
+            .material-icons{
+                
+                font-size: 60px;
+            }
+            
+             button{
+                padding: 10px;
+                background-color: #FD717A;
+                border: none;
+                width: 200px;
+                color: white;
+                margin-right: 15px;
+            }
+            .disabledButton{
+                background-color: #d8d8d8;
+            }
+            .bought button:active{
+                box-shadow: 2px 2px 2px 5px #FD717A;
+                outline:none;
+
+            }
+        .bought button:link{
+            outline:none;
+        }
+            .bought{
+                align-self: flex-end;
+                align-items:flex-start;
+                position:relative;
+                display: flex;
+                top: -40px;
+                color: #FD717A
+            }
+            .input{
+                border-top: none;
+                border-left: none;
+                border-right: none;
+                border-bottom: 0px solid lightgreen;
+                width: 0;
+            }
+            .input:focus{
+                outline: none;
+                transition: width .8s;
+                border-bottom: 1px solid lightgreen;
+                width: 200px;
+
+            }
+            .hilang{
+                display: none;
+            }
+            .activeTab{
+                color:aquamarine;
+                text-decoration: underline;
+            }
+            .tab{
+                cursor: pointer;
+            }
+        </style>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Candal&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Gurajada&display=swap" rel="stylesheet">
+
+    </head>
+    <body>
+        <div id="app">
+            <product :premium="premium" @add-to-cart="updateCart"></product>
+            <p>Cart: {{ cart.length }}</p>
+            <br>
+            </div>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script>
+var eventBus = new Vue()
+            Vue.component('product-tabs', {
+                props: {
+                    reviews: {
+                        type: Array,
+                        required: true
+                    }
+                },
+                template: `
+                <div>
+                <div>
+                <span class="tab" 
+                v-for="(tab, index) in tabs" 
+                :key="index" 
+                @click="selectedTab = tab"
+                :class="{ activeTab: selectedTab === tab }"
+                >
+                {{ tab }}
+                </span>
+                </div>
+                <div v-show="selectedTab === 'reviews'">
+            <h2>Reviews</h2>
+            <p v-if="!reviews.length">The are no reviews yet.</p>
+            <ul>
+            <li v-for="review in reviews">
+            <p>{{ review.name }}</p>
+            <p>Rating: {{ review.rating }} </p>
+            <p>Review: {{ review.review }}</p>
+            </li>
+            </ul>
+            </div>
+            <product-review v-show="selectedTab === 'make reviews'"></product-review>
+            </div>
+                `
+,        
+                data(){
+                    return {
+                        tabs: ["reviews", "make reviews"],
+                        selectedTab: "reviews"
+                    }
+                }
+    })
+            Vue.component('product-review', {
+                template: `
+<form class="product-review" @submit.prevent="onSubmit">  
+<p class="a" v-if="errors.length">
+<b>Please correct the following error</b>
+<ul>
+<li v-for="error in errors">{{ error }}</li>
+</ul>
+</p>
+<label class="label" for="nama">Nama: </label>
+    <input class="input" v-model="name" type="text" id="nama" placeholder="nama anda">
+    <br><br>
+    <label class="label" for="review">Review: </label>
+    <textarea id="review" v-model="review"></textarea>
+    <br><br>
+    <label class="label" for="rating">Rating: </label>
+    <select id="rating" v-model.number="rating">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+    </select>
+    <button>Kirim</button>
+    </form>
+
+
+                `,
+                data(){
+                    return {
+                        name: null,
+                        review: null,
+                        rating: null,
+                        errors: []
+                    }
+                },
+                methods:{
+                    
+        
+                    onSubmit(){
+                        if(this.name && this.review && this.rating){
+                        let productReview = {
+                            name: this.name,
+                            review: this.review,
+                            rating: this.rating
+                        }
+                        eventBus.$emit('review-submitted', productReview)
+                        this.name = null
+                        this.review = null
+                        this.rating = null
+                    }
+                    else{
+                        if(!this.name) this.errors.push("Hey please filled out name form")
+                        if(!this.review) this.errors.push("Hey please filled out review form")
+                        if(!this.rating) this.errors.push("Hey please filled out rating form")
+                        
+                    
+                    }
+                    
+                }
+                        },
+            })
+            Vue.component('product', {
+                props: {
+                premium: {
+                    type: Boolean,
+                    required: true
+                }
+            },
+                template: `<div class="container">
+                    <h1>{{ title }}</h1>
+            <div class="product">
+             <div class="product-image">
+                    <img :src="image" alt="">
+                </div>
+                <div class="product-info">
+                    <div class="stock">
+                        <p v-if="inStock > 10">in stock: {{ inStock }}</p>
+                        <p v-else-if="inStock <= 10 && inStock !== 0">Almost Sold Out!</p>
+                        <p v-else>Out of Stock</p>
+                    </div>
+                    <p>Shipping: {{ shipping }}</p>
+                    <ul class="detail">
+                        <li v-for="infos in info">{{ infos }}</li>
+                    </ul>
+                    <div class="variant" v-for="(variant, index) in variants">
+                            <i @mouseover="updateProduct(index)" class="material-icons">{{ variant.variantAlias }}</i>
+                 </div>
+                </div>
+                <div class="bought">
+                    <button @click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">add to Cart</button>
+                </div>
+            </div>
+            <product-tabs :reviews="reviews"></product-tabs>
+
+            </div>`,
+            
+            data(){
+            return { 
+                variants: [
+                        {
+                            variantBrand: "nike",
+                            variantId: 200,
+                            variantAlias: "done",
+                            variantImage: "images/nike.jpg",
+                            variantQuantity: 19
+                        },
+                        {
+                            variantBrand: "basket",
+                            variantId: 201,
+                            variantAlias: "donut_large",
+                            variantImage: "images/basketball.jpeg",
+                            variantQuantity: 2
+                        }
+                    ],
+                    product: 'Socks',
+                    info: ["80% cotton", "soft", "natural ingredient"],
+                    selectedVariant: 0,
+                    brand: 'Master',
+                    reviews: []
+                }
+            },
+    
+
+                methods: {
+                    addToCart: function(){
+                        this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId, this.variants[this.selectedVariant].variantBrand);
+                    },
+                    updateProduct: function(index){
+                        this.selectedVariant = index
+                    }
+                },
+                computed:{
+                    title(){
+                        return this.brand + ' ' + this.product
+                    },
+                    image(){
+                        return this.variants[this.selectedVariant].variantImage
+                    },
+                    inStock(){
+                        return this.variants[this.selectedVariant].variantQuantity
+                    },
+                    shipping(){
+                        if(this.premium){
+                            return "FREE"
+                        }
+                           return 1.99  
+                    }
+                },
+                mounted(){
+                    eventBus.$on('review-submitted', productReview => {
+                        this.reviews.push(productReview)
+
+                    })
+                }
+            })
+            var app = new Vue({
+                el: '#app',
+                data: {
+                premium: false,
+                cart: []     
+
+                },
+                methods:{
+                    updateCart(id, brand){
+                        this.cart.push(id, brand);
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>
